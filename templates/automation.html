@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Automation Engine & Data Pipeline{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h3 class="fw-bold text-white mb-1">
+                    <i class="bi bi-gear-wide-connected text-info me-2"></i> Automation Engine & Data Pipeline
+                </h3>
+                <p class="text-muted mb-0">
+                    Automated metric calculation, batch score normalization, database integrity validation, and instant exports.
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success-subtle text-success border border-success-subtle p-2 px-3">
+                    <i class="bi bi-activity me-1"></i> Pipeline Status: {{ diagnostics.status }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Diagnostics Grid -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Total Records Processed</div>
+            <div class="kpi-value text-info">{{ diagnostics.total_evals }}</div>
+            <div class="kpi-subtext">Across All Tools & Tasks</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Student Live Records</div>
+            <div class="kpi-value text-success">{{ diagnostics.user_evals }}</div>
+            <div class="kpi-subtext">Active Experimental Data</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Integrity Violations</div>
+            <div class="kpi-value {% if diagnostics.integrity_errors == 0 %}text-success{% else %}text-danger{% endif %}">
+                {{ diagnostics.integrity_errors }}
+            </div>
+            <div class="kpi-subtext">Out-of-Bounds Scores (0–100)</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Last Automated Run</div>
+            <div class="kpi-value fs-5 text-white">{{ diagnostics.last_automated_run.split(' ')[1] }}</div>
+            <div class="kpi-subtext">Timestamp Verified</div>
+        </div>
+    </div>
+</div>
+
+<!-- Automated Actions Row -->
+<div class="row g-4 mb-4">
+    <!-- Action 1: Batch Score Recalculator -->
+    <div class="col-lg-6">
+        <div class="saas-card h-100">
+            <div class="card-header-custom">
+                <h5 class="card-title-custom">
+                    <i class="bi bi-calculator-fill text-info"></i> Automated Batch Score Normalizer
+                </h5>
+                <span class="badge bg-dark border border-secondary text-info">Batch Algorithm</span>
+            </div>
+            <div class="card-body-custom">
+                <p class="text-light small mb-3">
+                    Automatically scans every evaluation record in the SQLite database and executes the Capstone 57 mathematical formula:
+                </p>
+                <div class="p-3 rounded bg-dark border border-secondary font-monospace text-info small mb-3 text-center">
+                    WeightedScore = (Acc × 0.40) + (Comp × 0.25) + (Rel × 0.20) + (Ease × 0.15)
+                </div>
+                <p class="text-muted small mb-4">
+                    Ensures 100% mathematical consistency across all experimental results, recalculating rankings and updating Chart.js endpoints automatically.
+                </p>
+                <form method="POST" action="{{ url_for('automation.recalculate') }}">
+                    <button type="submit" class="btn btn-cyan w-100">
+                        <i class="bi bi-play-circle-fill me-1"></i> Execute Automated Recalculation
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action 2: Automated Report & Export Pipeline -->
+    <div class="col-lg-6">
+        <div class="saas-card h-100">
+            <div class="card-header-custom">
+                <h5 class="card-title-custom">
+                    <i class="bi bi-cloud-arrow-down-fill text-info"></i> Automated Export Pipeline
+                </h5>
+                <span class="badge bg-dark border border-secondary text-success">Instant Trigger</span>
+            </div>
+            <div class="card-body-custom">
+                <p class="text-light small mb-3">
+                    Automatically serializes database rows into structured academic formats using <b>Pandas</b>, <b>OpenPyXL</b>, and <b>ReportLab</b>.
+                </p>
+                <div class="d-grid gap-2 mb-3">
+                    <a href="{{ url_for('reports.export_csv') }}" class="btn btn-outline-cyan">
+                        <i class="bi bi-file-earmark-spreadsheet me-2"></i> Auto-Generate CSV Export (.csv)
+                    </a>
+                    <a href="{{ url_for('reports.export_excel') }}" class="btn btn-outline-cyan">
+                        <i class="bi bi-file-earmark-excel me-2"></i> Auto-Generate Multi-Sheet Excel (.xlsx)
+                    </a>
+                    <a href="{{ url_for('reports.export_pdf') }}" class="btn btn-outline-cyan">
+                        <i class="bi bi-file-earmark-pdf me-2"></i> Auto-Generate Formal Research PDF (.pdf)
+                    </a>
+                </div>
+                <div class="text-muted small">
+                    <i class="bi bi-info-circle me-1"></i> Files are compiled on-the-fly and streamed directly to your browser without persisting unneeded server temporary files.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Management & Reset Baseline Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="saas-card p-4 border-warning">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <h5 class="text-white fw-bold mb-1">
+                        <i class="bi bi-arrow-clockwise text-warning me-2"></i> Reset to Baseline Benchmark Seed
+                    </h5>
+                    <p class="text-muted small mb-0">
+                        Restores the pristine 60-evaluation empirical baseline across all 4 AI tools and 15 test cases. Use this if test data was corrupted during experimentation.
+                    </p>
+                </div>
+                <form method="POST" action="{{ url_for('automation.reset_database') }}" onsubmit="return confirm('Restore database to the verified 60-evaluation benchmark baseline? Any custom records will be reset.');">
+                    <button type="submit" class="btn btn-outline-warning">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Restore Benchmark Baseline
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

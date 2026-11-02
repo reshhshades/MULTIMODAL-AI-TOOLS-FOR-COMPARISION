@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<!-- Welcome & Hero Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="saas-card p-4 p-md-5 position-relative overflow-hidden">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.3);">
+                        <i class="bi bi-mortarboard-fill text-info"></i>
+                        <span class="text-info small fw-bold text-uppercase">College Capstone Project 57</span>
+                    </div>
+                    <h2 class="display-6 fw-bold text-white mb-2">Multimodal AI Tools Comparison for Students</h2>
+                    <p class="text-muted lead mb-4" style="max-width: 680px; font-size: 1rem;">
+                        An empirical research platform evaluating how effectively free AI models—<b>ChatGPT</b>, <b>Google Gemini</b>, <b>Claude</b>, and <b>Microsoft Copilot</b>—handle images, PDF textbooks, and spoken lecture audio for college students without paid subscriptions.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url_for('evaluations.create') }}" class="btn btn-cyan px-3 py-2">
+                            <i class="bi bi-pencil-square me-1"></i> Record New Evaluation
+                        </a>
+                        <a href="{{ url_for('comparison.index') }}" class="btn btn-outline-cyan px-3 py-2">
+                            <i class="bi bi-bar-chart-fill me-1"></i> Comparative Analysis
+                        </a>
+                        <a href="{{ url_for('reports.export_pdf') }}" class="btn btn-outline-secondary px-3 py-2 text-white border-secondary">
+                            <i class="bi bi-file-earmark-arrow-down me-1"></i> Download PDF Report
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center mt-4 mt-lg-0">
+                    <div class="p-3 rounded-4" style="background: rgba(11, 19, 41, 0.85); border: 1px solid var(--border-color);">
+                        <div class="text-muted small text-uppercase fw-semibold mb-1">Top Performing AI Tool</div>
+                        <h3 class="text-white fw-bold mb-1">{{ summary.best_performing_tool }}</h3>
+                        <div class="display-5 fw-extrabold text-info mb-2">{{ summary.best_performing_score }}%</div>
+                        <div class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                            <i class="bi bi-trophy-fill me-1"></i> Benchmark Leader
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards Grid -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="kpi-label">AI Tools Tested</div>
+            <div class="kpi-value">{{ summary.total_tools }} <span class="kpi-unit">Platforms</span></div>
+            <div class="kpi-subtext">ChatGPT, Gemini, Claude, Copilot</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Total Test Cases</div>
+            <div class="kpi-value">{{ total_test_cases }} <span class="kpi-unit">Tasks</span></div>
+            <div class="kpi-subtext">5 Image &bull; 5 Document &bull; 5 Audio</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Completed Evaluations</div>
+            <div class="kpi-value">{{ summary.total_evaluations }} <span class="kpi-unit">Records</span></div>
+            <div class="kpi-subtext">Evaluated & Fact-Checked</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Overall Accuracy</div>
+            <div class="kpi-value text-info">{{ summary.overall_avg_accuracy }}<span class="kpi-unit">%</span></div>
+            <div class="kpi-subtext">Across All Modalities & Tasks</div>
+        </div>
+    </div>
+</div>
+
+<!-- Modality Champions Highlight -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="saas-card p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="badge-modality IMAGE"><i class="bi bi-image"></i> Image Category</span>
+                <span class="badge bg-dark border border-secondary text-info">Winner</span>
+            </div>
+            <h5 class="text-white fw-bold mb-1">{{ best_modality.IMAGE.tool }}</h5>
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted small">Weighted Score:</span>
+                <span class="fw-bold text-info fs-5">{{ best_modality.IMAGE.score }}%</span>
+            </div>
+            <div class="text-dim small mt-1">Accuracy: {{ best_modality.IMAGE.accuracy }}% on Diagrams & OCR</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="saas-card p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="badge-modality DOCUMENT"><i class="bi bi-file-earmark-text"></i> Document Category</span>
+                <span class="badge bg-dark border border-secondary text-warning">Winner</span>
+            </div>
+            <h5 class="text-white fw-bold mb-1">{{ best_modality.DOCUMENT.tool }}</h5>
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted small">Weighted Score:</span>
+                <span class="fw-bold text-warning fs-5">{{ best_modality.DOCUMENT.score }}%</span>
+            </div>
+            <div class="text-dim small mt-1">Accuracy: {{ best_modality.DOCUMENT.accuracy }}% on PDF Summaries</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="saas-card p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="badge-modality AUDIO"><i class="bi bi-mic"></i> Audio Category</span>
+                <span class="badge bg-dark border border-secondary text-danger">Winner</span>
+            </div>
+            <h5 class="text-white fw-bold mb-1">{{ best_modality.AUDIO.tool }}</h5>
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted small">Weighted Score:</span>
+                <span class="fw-bold text-danger fs-5">{{ best_modality.AUDIO.score }}%</span>
+            </div>
+            <div class="text-dim small mt-1">Accuracy: {{ best_modality.AUDIO.accuracy }}% on Native Audio Upload</div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Charts Section -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="saas-card">
+            <div class="card-header-custom">
+                <h5 class="card-title-custom">
+                    <i class="bi bi-graph-up text-info"></i> Overall Performance Comparison
+                </h5>
+                <span class="badge bg-dark border border-secondary text-muted">Weighted vs Accuracy</span>
+            </div>
+            <div class="card-body-custom">
+                <div style="height: 320px;">
+                    <canvas id="dashboardOverallChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="saas-card">
+            <div class="card-header-custom">
+                <h5 class="card-title-custom">
+                    <i class="bi bi-layers text-info"></i> Modality Breakdown
+                </h5>
+                <span class="badge bg-dark border border-secondary text-muted">Image &bull; Doc &bull; Audio</span>
+            </div>
+            <div class="card-body-custom">
+                <div style="height: 320px;">
+                    <canvas id="dashboardModalityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Tools Quick Matrix Table -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="saas-card">
+            <div class="card-header-custom">
+                <h5 class="card-title-custom">
+                    <i class="bi bi-shield-shaded text-info"></i> AI Tools Benchmark Summary
+                </h5>
+                <a href="{{ url_for('tools.index') }}" class="btn btn-sm btn-outline-cyan">
+                    View Full Tool Profiles <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>Tool Name</th>
+                            <th>Developer</th>
+                            <th>Free Tier Model</th>
+                            <th>Avg Accuracy</th>
+                            <th>Avg Weighted</th>
+                            <th>Hallucinations</th>
+                            <th>Best Modality</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tool in tools %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-{{ tool.badge_color }} p-1 rounded-circle"></span>
+                                    <strong class="text-white">{{ tool.name }}</strong>
+                                </div>
+                            </td>
+                            <td class="text-muted">{{ tool.developer }}</td>
+                            <td><span class="badge bg-dark border border-secondary text-light">{{ tool.model_version }}</span></td>
+                            <td class="fw-bold text-info">{{ tool.avg_accuracy }}%</td>
+                            <td class="fw-bold text-white">{{ tool.avg_weighted_score }}%</td>
+                            <td>
+                                {% if tool.total_hallucinations > 0 %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                        <i class="bi bi-exclamation-triangle me-1"></i> {{ tool.total_hallucinations }} Caught
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                        <i class="bi bi-check-circle me-1"></i> None Detected
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if tool.name == 'Google Gemini' %}
+                                    <span class="badge-modality AUDIO">Audio & Docs</span>
+                                {% elif tool.name == 'Claude' %}
+                                    <span class="badge-modality DOCUMENT">Documents</span>
+                                {% elif tool.name == 'ChatGPT' %}
+                                    <span class="badge-modality IMAGE">Image & Math</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Edge PDF</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success border border-success">
+                                    <i class="bi bi-patch-check-fill me-1"></i> Verified
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

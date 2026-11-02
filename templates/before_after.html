@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Before & After Fact-Checking Analysis{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h3 class="fw-bold text-white mb-1">
+                    <i class="bi bi-arrow-left-right text-info me-2"></i> Before & After Fact-Checking Analysis
+                </h3>
+                <p class="text-muted mb-0">
+                    Comparative tracking of initial student perceptions versus rigorous ground-truth textbook verification.
+                </p>
+            </div>
+            <button type="button" class="btn btn-sm btn-cyan" data-bs-toggle="modal" data-bs-target="#newBeforeAfterModal">
+                <i class="bi bi-plus-circle me-1"></i> Add Verification Audit
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Summary Ribbon -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Audited Cases</div>
+            <div class="kpi-value text-info">{{ total_audited }}</div>
+            <div class="kpi-subtext">Deep-Dive Fact Checks</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Average Delta Shift</div>
+            <div class="kpi-value {% if avg_delta < 0 %}text-danger{% else %}text-success{% endif %}">
+                {% if avg_delta > 0 %}+{% endif %}{{ avg_delta }}%
+            </div>
+            <div class="kpi-subtext">Post-Verification Net Delta</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Penalties Applied</div>
+            <div class="kpi-value text-danger">{{ penalties_applied }}</div>
+            <div class="kpi-subtext">Hallucinations / False Citations</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Positive Upgrades</div>
+            <div class="kpi-value text-success">{{ positive_adjustments }}</div>
+            <div class="kpi-subtext">Unnoticed Nuances Credited</div>
+        </div>
+    </div>
+</div>
+
+<!-- Before & After Comparison Cards Grid -->
+<div class="row g-4">
+    {% for r in records %}
+    <div class="col-lg-6">
+        <div class="saas-card h-100 d-flex flex-column">
+            <div class="card-header-custom">
+                <div class="d-flex align-items-center gap-2">
+                    <strong class="text-white">{{ r.tool_name }}</strong>
+                    <span class="badge-modality {{ r.modality }}">{{ r.modality }}</span>
+                </div>
+                <span class="badge bg-dark border border-secondary text-info">{{ r.case_code }}</span>
+            </div>
+
+            <div class="card-body-custom flex-grow-1">
+                <h5 class="text-white fw-bold mb-3">{{ r.task_title }}</h5>
+
+                <!-- Score Delta Comparison Box -->
+                <div class="row g-2 p-3 rounded bg-dark border border-secondary mb-3 text-center">
+                    <div class="col-4">
+                        <div class="text-muted small">Initial Score</div>
+                        <div class="fw-bold text-light fs-5">{{ r.initial_score }}%</div>
+                    </div>
+                    <div class="col-4 border-start border-end border-secondary">
+                        <div class="text-muted small">Score Delta</div>
+                        <div class="fw-bold fs-5 {% if r.score_delta > 0 %}text-success{% else %}text-danger{% endif %}">
+                            {% if r.score_delta > 0 %}+{% endif %}{{ r.score_delta }}%
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Verified Score</div>
+                        <div class="fw-bold text-info fs-5">{{ r.verified_score }}%</div>
+                    </div>
+                </div>
+
+                <!-- Errors Identified -->
+                <div class="mb-3">
+                    <span class="text-danger small fw-bold">
+                        <i class="bi bi-x-circle-fill me-1"></i> Errors / Discrepancies Caught:
+                    </span>
+                    <p class="text-light small mt-1 mb-0">{{ r.errors_identified }}</p>
+                </div>
+
+                <!-- Fact Check Investigation Notes -->
+                <div class="mb-3">
+                    <span class="text-warning small fw-bold">
+                        <i class="bi bi-search me-1"></i> Fact-Checking Investigation:
+                    </span>
+                    <p class="text-muted small mt-1 mb-0">{{ r.fact_check_notes }}</p>
+                </div>
+
+                <!-- Improvement Strategy -->
+                <div class="p-2 rounded" style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.2);">
+                    <span class="text-info small fw-bold">
+                        <i class="bi bi-lightbulb-fill me-1"></i> Student Strategy & Recommendation:
+                    </span>
+                    <p class="text-light small mt-1 mb-0">{{ r.improvement_strategy }}</p>
+                </div>
+            </div>
+
+            <div class="p-3 border-top border-dark d-flex align-items-center justify-content-between" style="background: rgba(7, 13, 25, 0.6);">
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                    <i class="bi bi-check2-all me-1"></i> {{ r.verification_status }}
+                </span>
+                <span class="text-dim small">{{ r.created_at }}</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal to Add New Before & After Audit -->
+<div class="modal fade" id="newBeforeAfterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); color: #fff;">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-plus-circle text-info me-2"></i> Record Before & After Audit
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('before_after.create') }}">
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label-custom">AI Tool <span class="text-danger">*</span></label>
+                            <select name="tool_id" class="form-select form-select-custom" required>
+                                <option value="" disabled selected>Select tool...</option>
+                                {% for tool in tools %}
+                                    <option value="{{ tool.id }}">{{ tool.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Task / Test Case <span class="text-danger">*</span></label>
+                            <select name="test_case_id" class="form-select form-select-custom" required>
+                                <option value="" disabled selected>Select task...</option>
+                                {% for tc in test_cases %}
+                                    <option value="{{ tc.id }}">[{{ tc.modality }}] {{ tc.case_code }}: {{ tc.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Initial Score (%) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.1" min="0" max="100" class="form-control form-control-custom" name="initial_score" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Verified Score (%) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.1" min="0" max="100" class="form-control form-control-custom" name="verified_score" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">Errors or Discrepancies Caught <span class="text-danger">*</span></label>
+                        <textarea class="form-control form-control-custom" name="errors_identified" rows="2" placeholder="Describe false formulas, hallucinated citations, etc." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">Fact-Checking Investigation Notes <span class="text-danger">*</span></label>
+                        <textarea class="form-control form-control-custom" name="fact_check_notes" rows="2" placeholder="Textbook source used to disprove or verify the output..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">Student Strategy & Improvement <span class="text-danger">*</span></label>
+                        <textarea class="form-control form-control-custom" name="improvement_strategy" rows="2" placeholder="How students can prompt or verify this in the future..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-cyan">Save Verification Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Multimodal Output Verification Checklist{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h3 class="fw-bold text-white mb-1">
+                    <i class="bi bi-shield-check text-info me-2"></i> Multimodal Output Verification Checklist
+                </h3>
+                <p class="text-muted mb-0">
+                    Interactive 7-point audit tool for students to detect errors, hallucinations, and privacy risks in AI generated answers.
+                </p>
+            </div>
+            <span class="badge bg-dark border border-secondary text-info p-2 px-3">
+                <i class="bi bi-patch-question-fill me-1"></i> Student Quality Assurance Protocol
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Interactive Audit Form -->
+    <div class="col-lg-5">
+        <div class="saas-card h-100">
+            <div class="card-header-custom">
+                <h5 class="card-title-custom">
+                    <i class="bi bi-clipboard2-check text-info"></i> Audit New AI Output
+                </h5>
+                <span class="badge bg-success" id="liveRiskLevel">Low Risk</span>
+            </div>
+            <div class="card-body-custom">
+                <form id="checklistAuditForm" method="POST" action="{{ url_for('checklist.index') }}">
+                    <div class="mb-3">
+                        <label class="form-label-custom">AI Tool Tested <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-custom" name="tool_name" required>
+                            <option value="" disabled selected>Select tool...</option>
+                            <option value="ChatGPT">ChatGPT (OpenAI)</option>
+                            <option value="Google Gemini">Google Gemini (DeepMind)</option>
+                            <option value="Claude">Claude (Anthropic)</option>
+                            <option value="Microsoft Copilot">Microsoft Copilot</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">Task or Topic Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-custom" name="task_name" 
+                               placeholder="e.g. Physics Mach Cone Lecture Transcription" required>
+                    </div>
+
+                    <!-- The 7 Verification Checkpoints -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-warning small fw-bold text-uppercase">Check all defects detected:</span>
+                            <span class="badge bg-dark border border-secondary text-info" id="liveReliabilityScore">100.0%</span>
+                        </div>
+
+                        <div class="form-check p-2 rounded bg-dark border border-secondary mb-2">
+                            <input class="form-check-input check-risk-item ms-1 me-2" type="checkbox" id="c1" name="has_incorrect_info">
+                            <label class="form-check-label text-light small" for="c1">
+                                <strong>1. Incorrect Information:</strong> Factual or mathematical errors identified.
+                            </label>
+                        </div>
+
+                        <div class="form-check p-2 rounded bg-dark border border-secondary mb-2">
+                            <input class="form-check-input check-risk-item ms-1 me-2" type="checkbox" id="c2" name="has_missing_info">
+                            <label class="form-check-label text-light small" for="c2">
+                                <strong>2. Missing Information:</strong> Omitted critical prompt constraints or steps.
+                            </label>
+                        </div>
+
+                        <div class="form-check p-2 rounded bg-dark border border-secondary mb-2">
+                            <input class="form-check-input check-risk-item ms-1 me-2" type="checkbox" id="c3" name="has_hallucinations">
+                            <label class="form-check-label text-light small" for="c3">
+                                <strong>3. Hallucinations:</strong> Fabricated citations, authors, or diagram components.
+                            </label>
+                        </div>
+
+                        <div class="form-check p-2 rounded bg-dark border border-secondary mb-2">
+                            <input class="form-check-input check-risk-item ms-1 me-2" type="checkbox" id="c4" name="has_unsafe_advice">
+                            <label class="form-check-label text-light small" for="c4">
+                                <strong>4. Unsafe Advice:</strong> Dangerous lab procedures or hazardous instructions.
+                            </label>
+                        </div>
+
+                        <div class="form-check p-2 rounded bg-dark border border-secondary mb-2">
+                            <input class="form-check-input check-risk-item ms-1 me-2" type="checkbox" id="c5" name="has_outdated_info">
+                            <label class="form-check-label text-light small" for="c5">
+                                <strong>5. Outdated Information:</strong> Deprecated software libraries or obsolete standards.
+                            </label>
+                        </div>
+
+                        <div class="form-check p-2 rounded bg-dark border border-secondary mb-2">
+                            <input class="form-check-input check-risk-item ms-1 me-2" type="checkbox" id="c6" name="has_source_reliability_issues">
+                            <label class="form-check-label text-light small" for="c6">
+                                <strong>6. Source Reliability:</strong> Cited commercial advertisements or unverified blogs.
+                            </label>
+                        </div>
+
+                        <div class="form-check p-2 rounded bg-dark border border-secondary mb-3">
+                            <input class="form-check-input check-risk-item ms-1 me-2" type="checkbox" id="c7" name="has_privacy_risks">
+                            <label class="form-check-label text-light small" for="c7">
+                                <strong>7. Privacy Risks:</strong> Ingested or exposed private student/university information.
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">Auditor Investigation Notes</label>
+                        <textarea class="form-control form-control-custom" name="notes" rows="3" 
+                                  placeholder="Detail any ground truth discrepancies discovered during verification..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-cyan w-100">
+                        <i class="bi bi-save me-1"></i> Save Verification Audit Record
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audited History Table -->
+    <div class="col-lg-7">
+        <div class="saas-card h-100">
+            <div class="card-header-custom">
+                <h5 class="card-title-custom">
+                    <i class="bi bi-journal-text text-info"></i> Recorded Verification Audits
+                </h5>
+                <span class="badge bg-dark border border-secondary text-muted">{{ audits|length }} Audits Logged</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>Tool & Task</th>
+                            <th>Reliability</th>
+                            <th>Risk Level</th>
+                            <th>Defects Caught</th>
+                            <th>Audit Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in audits %}
+                        <tr>
+                            <td>
+                                <strong class="text-white">{{ a.tool_name }}</strong>
+                                <div class="text-muted small text-truncate" style="max-width: 160px;" title="{{ a.task_name }}">
+                                    {{ a.task_name }}
+                                </div>
+                            </td>
+                            <td class="fw-bold text-info">{{ a.reliability_score }}%</td>
+                            <td>
+                                {% if a.risk_level == 'Low' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Low</span>
+                                {% elif a.risk_level == 'Moderate' %}
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Moderate</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">{{ a.risk_level }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% if a.has_incorrect_info %}<span class="badge bg-danger p-1" title="Incorrect Info">Err</span>{% endif %}
+                                    {% if a.has_missing_info %}<span class="badge bg-warning text-dark p-1" title="Missing Info">Miss</span>{% endif %}
+                                    {% if a.has_hallucinations %}<span class="badge bg-danger p-1" title="Hallucination">Halluc</span>{% endif %}
+                                    {% if a.has_unsafe_advice %}<span class="badge bg-danger p-1" title="Unsafe">Unsafe</span>{% endif %}
+                                    {% if a.has_outdated_info %}<span class="badge bg-secondary p-1" title="Outdated">Old</span>{% endif %}
+                                    {% if a.has_source_reliability_issues %}<span class="badge bg-warning text-dark p-1" title="Source Issues">Source</span>{% endif %}
+                                    {% if a.has_privacy_risks %}<span class="badge bg-danger p-1" title="Privacy Risk">Priv</span>{% endif %}
+                                    {% if not (a.has_incorrect_info or a.has_missing_info or a.has_hallucinations or a.has_unsafe_advice or a.has_outdated_info or a.has_source_reliability_issues or a.has_privacy_risks) %}
+                                        <span class="badge bg-success p-1">Clean</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-muted small" style="max-width: 180px;">
+                                {{ a.notes or 'No notes provided.' }}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                No checklist audits logged yet. Use the form to audit an AI output.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

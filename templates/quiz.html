@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Multimodal AI Knowledge Quiz{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h3 class="fw-bold text-white mb-1">
+                    <i class="bi bi-patch-question text-info me-2"></i> Multimodal AI Evaluation Quiz
+                </h3>
+                <p class="text-muted mb-0">
+                    Test your understanding of multimodal AI architectures, free-tier limitations, scoring methodologies, and safety ethics.
+                </p>
+            </div>
+            <span class="badge bg-dark border border-secondary text-info p-2 px-3">
+                <i class="bi bi-clock-history me-1"></i> 10 Questions &bull; Passing Score: 60%
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Results Card (Displayed if submitted) -->
+{% if results %}
+<div class="row justify-content-center mb-4">
+    <div class="col-xl-9 col-lg-10">
+        <div class="saas-card p-4 text-center {% if results.passed %}border-success{% else %}border-danger{% endif %}">
+            <div class="d-inline-flex p-3 rounded-circle mb-3 {% if results.passed %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %}">
+                <i class="bi {% if results.passed %}bi-trophy-fill{% else %}bi-exclamation-triangle-fill{% endif %} fs-1"></i>
+            </div>
+            <h3 class="fw-bold text-white mb-1">
+                {% if results.passed %}Congratulations! You Passed!{% else %}Review & Try Again{% endif %}
+            </h3>
+            <div class="display-5 fw-extrabold {% if results.passed %}text-success{% else %}text-danger{% endif %} mb-2">
+                {{ results.percentage }}%
+            </div>
+            <p class="text-muted mb-3">
+                You answered <strong>{{ results.correct_answers }}</strong> out of <strong>{{ results.total_questions }}</strong> questions correctly.
+            </p>
+            <a href="{{ url_for('quiz.index') }}" class="btn btn-sm btn-outline-cyan">
+                <i class="bi bi-arrow-repeat me-1"></i> Retake Quiz
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quiz Form & Questions -->
+<div class="row justify-content-center">
+    <div class="col-xl-9 col-lg-10">
+        <form method="POST" action="{{ url_for('quiz.index') }}">
+            {% for q in questions %}
+                {% set res = None %}
+                {% if results %}
+                    {% for d in results.details %}
+                        {% if d.id == q.id %}{% set res = d %}{% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <div class="saas-card mb-4 {% if res %}{% if res.is_correct %}border-success{% else %}border-danger{% endif %}{% endif %}">
+                    <div class="card-header-custom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary">Q{{ q.question_number }}</span>
+                            <span class="badge bg-dark border border-secondary text-info">{{ q.category }}</span>
+                        </div>
+                        {% if res %}
+                            {% if res.is_correct %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Correct (+10%)
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                    <i class="bi bi-x-circle-fill me-1"></i> Incorrect
+                                </span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <div class="card-body-custom">
+                        <h5 class="text-white fw-semibold mb-3">{{ q.question }}</h5>
+
+                        <div class="row g-2">
+                            <!-- Option A -->
+                            <div class="col-md-6">
+                                <div class="form-check p-2 rounded bg-dark border border-secondary h-100 d-flex align-items-center">
+                                    <input class="form-check-input ms-1 me-2" type="radio" 
+                                           name="question_{{ q.id }}" id="q{{ q.id }}_A" value="A"
+                                           {% if res and res.user_selected == 'A' %}checked{% endif %}
+                                           {% if results %}disabled{% else %}required{% endif %}>
+                                    <label class="form-check-label text-light small flex-grow-1" for="q{{ q.id }}_A">
+                                        <strong>A.</strong> {{ q.option_a }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Option B -->
+                            <div class="col-md-6">
+                                <div class="form-check p-2 rounded bg-dark border border-secondary h-100 d-flex align-items-center">
+                                    <input class="form-check-input ms-1 me-2" type="radio" 
+                                           name="question_{{ q.id }}" id="q{{ q.id }}_B" value="B"
+                                           {% if res and res.user_selected == 'B' %}checked{% endif %}
+                                           {% if results %}disabled{% endif %}>
+                                    <label class="form-check-label text-light small flex-grow-1" for="q{{ q.id }}_B">
+                                        <strong>B.</strong> {{ q.option_b }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Option C -->
+                            <div class="col-md-6">
+                                <div class="form-check p-2 rounded bg-dark border border-secondary h-100 d-flex align-items-center">
+                                    <input class="form-check-input ms-1 me-2" type="radio" 
+                                           name="question_{{ q.id }}" id="q{{ q.id }}_C" value="C"
+                                           {% if res and res.user_selected == 'C' %}checked{% endif %}
+                                           {% if results %}disabled{% endif %}>
+                                    <label class="form-check-label text-light small flex-grow-1" for="q{{ q.id }}_C">
+                                        <strong>C.</strong> {{ q.option_c }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Option D -->
+                            <div class="col-md-6">
+                                <div class="form-check p-2 rounded bg-dark border border-secondary h-100 d-flex align-items-center">
+                                    <input class="form-check-input ms-1 me-2" type="radio" 
+                                           name="question_{{ q.id }}" id="q{{ q.id }}_D" value="D"
+                                           {% if res and res.user_selected == 'D' %}checked{% endif %}
+                                           {% if results %}disabled{% endif %}>
+                                    <label class="form-check-label text-light small flex-grow-1" for="q{{ q.id }}_D">
+                                        <strong>D.</strong> {{ q.option_d }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Explanations after Submission -->
+                        {% if res %}
+                        <div class="mt-3 p-3 rounded bg-dark border border-secondary">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-info fw-bold small"><i class="bi bi-info-circle me-1"></i> Correct Answer: Option {{ q.correct_option }}</span>
+                                {% if not res.is_correct %}
+                                    <span class="text-danger small">(You selected: Option {{ res.user_selected or 'None' }})</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-muted small">
+                                <strong>Explanation:</strong> {{ q.explanation }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% if not results %}
+            <div class="text-center pb-5">
+                <button type="submit" class="btn btn-cyan px-5 py-2 fs-6">
+                    <i class="bi bi-check2-circle me-1"></i> Submit Quiz & View Detailed Explanations
+                </button>
+            </div>
+            {% endif %}
+        </form>
+
+        <!-- Answer Key Reference Section -->
+        <div class="saas-card p-4 mt-2 mb-5">
+            <h5 class="fw-bold text-white mb-3">
+                <i class="bi bi-key-fill text-info me-2"></i> Complete Quiz Answer Key & Verification Reference
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Question Summary</th>
+                            <th>Category</th>
+                            <th>Correct Option</th>
+                            <th>Key Concept</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for q in questions %}
+                        <tr>
+                            <td><strong>Q{{ q.question_number }}</strong></td>
+                            <td class="text-light">{{ q.question[:65] }}...</td>
+                            <td><span class="badge bg-dark border border-secondary text-info">{{ q.category }}</span></td>
+                            <td><span class="badge bg-success">Option {{ q.correct_option }}</span></td>
+                            <td class="text-muted small">{{ q.explanation[:80] }}...</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

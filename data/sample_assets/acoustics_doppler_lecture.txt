@@ -1,0 +1,7 @@
+[00:00] Prof. Adams: Good morning, class. Today we explore acoustic waves, the Doppler frequency shift, and the geometry of supersonic Mach cones.
+[00:18] When a sound source moves toward an observer at velocity v_source, the observed frequency f' is higher than the emitted frequency f because the wavefronts are compressed.
+[00:45] The formula is f' = f * (v_sound / (v_sound - v_source)).
+[01:10] Now, what happens when the source exceeds the speed of sound? That is, when the Mach number M = v_source / v_sound is greater than 1?
+[01:30] At supersonic speeds, the spherical wavefronts form a conical shockwave envelope known as the Mach cone.
+[01:50] The half-angle theta of this Mach cone is given by: theta = arcsin(v_sound / v_source) = arcsin(1 / M).
+[02:15] Notice that as the speed of the supersonic aircraft increases, the Mach cone becomes narrower and sharper. This explains why sonic booms are perceived along the hyperbolic ground track. Thank you.

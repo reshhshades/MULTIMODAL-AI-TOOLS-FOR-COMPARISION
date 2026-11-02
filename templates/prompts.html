@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Multimodal Prompt Library{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h3 class="fw-bold text-white mb-1">
+                    <i class="bi bi-terminal text-info me-2"></i> Multimodal Prompt Library for Students
+                </h3>
+                <p class="text-muted mb-0">
+                    High-yield, tested prompt engineering templates engineered to minimize hallucinations and extract structured academic outputs.
+                </p>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <!-- Modality Filter Buttons -->
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('prompts.index', category='ALL') }}" class="btn btn-sm {% if selected_category == 'ALL' %}btn-cyan{% else %}btn-outline-cyan{% endif %}">
+                        All Prompts
+                    </a>
+                    <a href="{{ url_for('prompts.index', category='IMAGE') }}" class="btn btn-sm {% if selected_category == 'IMAGE' %}btn-cyan{% else %}btn-outline-cyan{% endif %}">
+                        Image
+                    </a>
+                    <a href="{{ url_for('prompts.index', category='DOCUMENT') }}" class="btn btn-sm {% if selected_category == 'DOCUMENT' %}btn-cyan{% else %}btn-outline-cyan{% endif %}">
+                        Document
+                    </a>
+                    <a href="{{ url_for('prompts.index', category='AUDIO') }}" class="btn btn-sm {% if selected_category == 'AUDIO' %}btn-cyan{% else %}btn-outline-cyan{% endif %}">
+                        Audio
+                    </a>
+                </div>
+
+                <button type="button" class="btn btn-sm btn-cyan" data-bs-toggle="modal" data-bs-target="#newPromptModal">
+                    <i class="bi bi-plus-circle me-1"></i> Add Custom Prompt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prompts Grid -->
+<div class="row g-4">
+    {% for p in prompts %}
+    <div class="col-lg-6">
+        <div class="saas-card h-100 d-flex flex-column">
+            <div class="card-header-custom">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge-modality {{ p.category }}">
+                        {% if p.category == 'IMAGE' %}<i class="bi bi-image"></i>{% elif p.category == 'DOCUMENT' %}<i class="bi bi-file-earmark-text"></i>{% else %}<i class="bi bi-mic"></i>{% endif %}
+                        {{ p.category }}
+                    </span>
+                    <span class="badge bg-dark border border-secondary text-info">{{ p.difficulty }}</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-cyan py-1 px-2" onclick="copyToClipboard('prompt_box_{{ p.id }}', this)">
+                    <i class="bi bi-copy me-1"></i> Copy
+                </button>
+            </div>
+
+            <div class="card-body-custom flex-grow-1">
+                <h5 class="text-white fw-bold mb-2">{{ p.title }}</h5>
+
+                <!-- Prompt Body -->
+                <div class="p-3 rounded bg-dark border border-secondary font-monospace text-light small mb-3" id="prompt_box_{{ p.id }}" style="font-size: 0.85rem; line-height: 1.6; max-height: 140px; overflow-y: auto;">
+                    {{ p.prompt_text }}
+                </div>
+
+                <!-- Target Outcome -->
+                <div class="mb-2">
+                    <span class="text-info small fw-bold">Target Learning Outcome:</span>
+                    <p class="text-muted small mb-0">{{ p.target_outcome }}</p>
+                </div>
+            </div>
+
+            <div class="p-3 border-top border-dark d-flex align-items-center justify-content-between" style="background: rgba(7, 13, 25, 0.6);">
+                <span class="text-muted small">
+                    Recommended Model: <strong class="text-light">{{ p.recommended_tool }}</strong>
+                </span>
+                <a href="{{ url_for('evaluations.create') }}" class="btn btn-sm btn-outline-cyan">
+                    <i class="bi bi-arrow-right-circle me-1"></i> Use in Evaluation
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal to Add Custom Prompt -->
+<div class="modal fade" id="newPromptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); color: #fff;">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-plus-circle text-info me-2"></i> Add Reusable Prompt
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('prompts.create') }}">
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Target Modality <span class="text-danger">*</span></label>
+                            <select name="category" class="form-select form-select-custom" required>
+                                <option value="IMAGE">IMAGE (Diagrams, OCR, Charts)</option>
+                                <option value="DOCUMENT">DOCUMENT (PDF, Textbook, Notes)</option>
+                                <option value="AUDIO">AUDIO (Lectures, Speech, Seminars)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Difficulty Level</label>
+                            <select name="difficulty" class="form-select form-select-custom">
+                                <option value="Basic">Basic</option>
+                                <option value="Intermediate" selected>Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">Prompt Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-custom" name="title" placeholder="e.g. Socratic Code & Circuit Reviewer" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">Prompt Text Template <span class="text-danger">*</span></label>
+                        <textarea class="form-control form-control-custom font-monospace" name="prompt_text" rows="4" placeholder="Enter explicit instructions, role assignment, and negative constraints..." required></textarea>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Expected Target Outcome</label>
+                            <input type="text" class="form-control form-control-custom" name="target_outcome" placeholder="e.g. Markdown revision notes with flashcards">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Recommended AI Model</label>
+                            <input type="text" class="form-control form-control-custom" name="recommended_tool" placeholder="e.g. Claude / Google Gemini">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-cyan">Save to Prompt Library</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

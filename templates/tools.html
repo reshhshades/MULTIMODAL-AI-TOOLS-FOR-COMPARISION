@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}AI Tools Information & Capabilities{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h3 class="fw-bold text-white mb-1">
+                    <i class="bi bi-robot text-info me-2"></i> Evaluated Multimodal AI Platforms
+                </h3>
+                <p class="text-muted mb-0">
+                    Comprehensive technical specifications, free-tier limits, official source documentation, and verified research dates.
+                </p>
+            </div>
+            <div class="badge bg-dark border border-secondary text-info p-2 px-3">
+                <i class="bi bi-shield-check me-1"></i> Strictly Zero-Cost Free Tiers Evaluated
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tools Grid -->
+<div class="row g-4">
+    {% for tool in tools %}
+    <div class="col-lg-6">
+        <div class="saas-card h-100 d-flex flex-direction-column">
+            <div class="card-header-custom">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="brand-icon" style="background: linear-gradient(135deg, var(--{{ tool.badge_color }}) 0%, #06b6d4 100%);">
+                        {{ tool.name[0] }}
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-white mb-0">{{ tool.name }}</h5>
+                        <div class="text-muted small">Developer: <strong class="text-info">{{ tool.developer }}</strong></div>
+                    </div>
+                </div>
+                <span class="badge bg-dark border border-secondary text-light">
+                    {{ tool.model_version }}
+                </span>
+            </div>
+
+            <div class="card-body-custom flex-grow-1">
+                <p class="text-light mb-3" style="font-size: 0.9rem;">
+                    {{ tool.description }}
+                </p>
+
+                <!-- Multimodal Modality Matrix -->
+                <div class="p-3 rounded-3 mb-3" style="background: rgba(11, 19, 41, 0.7); border: 1px solid var(--border-color);">
+                    <div class="fw-semibold text-white small mb-2 text-uppercase letter-spacing">
+                        <i class="bi bi-layers-fill text-info me-1"></i> Multimodal Ingestion Capabilities
+                    </div>
+                    
+                    <div class="mb-2">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge-modality IMAGE" style="font-size: 0.65rem;">Image</span>
+                            <span class="text-white small fw-semibold">Vision Support</span>
+                        </div>
+                        <div class="text-muted small ms-3 ps-2 border-start border-secondary">
+                            {{ tool.image_support }}
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge-modality DOCUMENT" style="font-size: 0.65rem;">Document</span>
+                            <span class="text-white small fw-semibold">PDF / Text Support</span>
+                        </div>
+                        <div class="text-muted small ms-3 ps-2 border-start border-secondary">
+                            {{ tool.document_support }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge-modality AUDIO" style="font-size: 0.65rem;">Audio</span>
+                            <span class="text-white small fw-semibold">Audio & Speech Support</span>
+                        </div>
+                        <div class="text-muted small ms-3 ps-2 border-start border-secondary">
+                            {{ tool.audio_support }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Free Tier Limitations -->
+                <div class="mb-3">
+                    <div class="fw-semibold text-warning small mb-1">
+                        <i class="bi bi-hourglass-split me-1"></i> Free-Tier Throttling & Constraints:
+                    </div>
+                    <div class="p-2 rounded bg-dark border border-secondary text-muted small">
+                        {{ tool.free_tier_limits }}
+                    </div>
+                </div>
+
+                <!-- Verified Facts vs Assumptions -->
+                <div class="mb-3">
+                    <div class="fw-semibold text-info small mb-1">
+                        <i class="bi bi-check2-circle me-1"></i> Verified Facts vs Disclaimers:
+                    </div>
+                    <div class="p-2 rounded" style="background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.2); font-size: 0.8rem; color: #cbd5e1;">
+                        {{ tool.assumptions_notes }}
+                    </div>
+                </div>
+
+                <!-- Metrics Ribbon -->
+                <div class="row g-2 text-center pt-2 border-top border-secondary">
+                    <div class="col-4">
+                        <div class="text-muted small">Avg Accuracy</div>
+                        <div class="fw-bold text-info fs-5">{{ tool.avg_accuracy }}%</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Weighted Score</div>
+                        <div class="fw-bold text-white fs-5">{{ tool.avg_weighted_score }}%</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted small">Hallucinations</div>
+                        <div class="fw-bold {% if tool.total_hallucinations > 0 %}text-danger{% else %}text-success{% endif %} fs-5">
+                            {{ tool.total_hallucinations or 0 }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 border-top border-dark d-flex align-items-center justify-content-between" style="background: rgba(7, 13, 25, 0.6);">
+                <div class="text-dim small">
+                    <i class="bi bi-calendar-check me-1"></i> Verified: <span class="text-light">{{ tool.verified_date }}</span>
+                </div>
+                <a href="{{ tool.official_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-cyan">
+                    Official Website <i class="bi bi-box-arrow-up-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

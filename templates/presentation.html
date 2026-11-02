@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Viva Presentation Deck (6 Slides){% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h3 class="fw-bold text-white mb-1">
+                    <i class="bi bi-easel2 text-info me-2"></i> College Viva Presentation Deck
+                </h3>
+                <p class="text-muted mb-0">
+                    Interactive 6-slide presentation deck prepared for college viva defense and faculty evaluation.
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-outline-cyan" id="toggleNotesBtn">
+                    <i class="bi bi-chat-square-text me-1"></i> Toggle Speaker Notes
+                </button>
+                <button type="button" class="btn btn-sm btn-cyan" id="fullscreenBtn">
+                    <i class="bi bi-arrows-fullscreen me-1"></i> Fullscreen Mode
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide Deck Container -->
+<div class="row justify-content-center" id="presentationContainer">
+    <div class="col-xl-11">
+        <!-- Slide Indicator Pills -->
+        <div class="d-flex justify-content-center gap-2 mb-3">
+            {% for s in slides %}
+                <button type="button" class="btn btn-sm slide-indicator-btn {% if loop.first %}btn-cyan{% else %}btn-outline-secondary text-light{% endif %}" 
+                        onclick="goToSlide({{ loop.index0 }})" id="indicatorBtn{{ loop.index0 }}">
+                    Slide {{ s.slide_num }}
+                </button>
+            {% endfor %}
+        </div>
+
+        <!-- Slides Wrapper -->
+        {% for s in slides %}
+        <div class="slide-pane {% if not loop.first %}d-none{% endif %}" id="slidePane{{ loop.index0 }}">
+            <div class="saas-card slide-card p-4 p-md-5 mb-3 border-info">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="badge bg-primary px-3 py-1">{{ s.badge }}</span>
+                        <span class="text-muted small">Candidate: <strong class="text-white">{{ student_name }}</strong></span>
+                    </div>
+
+                    <h2 class="display-6 fw-bold text-white mb-2">{{ s.title }}</h2>
+                    <h5 class="text-info fw-normal mb-4">{{ s.subtitle }}</h5>
+
+                    <ul class="slide-bullets text-light ps-4">
+                        {% for b in s.bullets %}
+                            <li>{{ b|safe }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Viva Speaker Notes Block -->
+                <div class="speaker-notes-box mt-4" id="speakerNotes{{ loop.index0 }}">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-mic-fill text-info"></i>
+                        <strong class="text-info text-uppercase small">Examiner Defense Notes (Say this to the evaluation panel):</strong>
+                    </div>
+                    <div class="text-light small">
+                        "{{ s.speaker_notes }}"
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Navigation Controls Footer -->
+        <div class="d-flex align-items-center justify-content-between p-3 rounded bg-dark border border-secondary mb-5">
+            <button type="button" class="btn btn-outline-cyan" id="prevSlideBtn" onclick="navigateSlide(-1)">
+                <i class="bi bi-chevron-left me-1"></i> Previous Slide
+            </button>
+
+            <span class="text-muted small fw-semibold">
+                Use <kbd class="bg-secondary text-white">&larr;</kbd> and <kbd class="bg-secondary text-white">&rarr;</kbd> Arrow Keys to Navigate
+            </span>
+
+            <button type="button" class="btn btn-cyan" id="nextSlideBtn" onclick="navigateSlide(1)">
+                Next Slide <i class="bi bi-chevron-right ms-1"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentSlide = 0;
+    const totalSlides = {{ slides|length }};
+
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+
+        for (let i = 0; i < totalSlides; i++) {
+            const pane = document.getElementById('slidePane' + i);
+            const btn = document.getElementById('indicatorBtn' + i);
+            if (pane) {
+                if (i === currentSlide) {
+                    pane.classList.remove('d-none');
+                } else {
+                    pane.classList.add('d-none');
+                }
+            }
+            if (btn) {
+                if (i === currentSlide) {
+                    btn.className = 'btn btn-sm slide-indicator-btn btn-cyan';
+                } else {
+                    btn.className = 'btn btn-sm slide-indicator-btn btn-outline-secondary text-light';
+                }
+            }
+        }
+
+        // Disable/enable prev and next buttons
+        document.getElementById('prevSlideBtn').disabled = (currentSlide === 0);
+        document.getElementById('nextSlideBtn').disabled = (currentSlide === totalSlides - 1);
+    }
+
+    function navigateSlide(direction) {
+        showSlide(currentSlide + direction);
+    }
+
+    function goToSlide(index) {
+        showSlide(index);
+    }
+
+    // Keyboard Arrow Keys Listener
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' || e.key === 'Space') {
+            navigateSlide(1);
+        } else if (e.key === 'ArrowLeft') {
+            navigateSlide(-1);
+        }
+    });
+
+    // Toggle Speaker Notes
+    document.getElementById('toggleNotesBtn').addEventListener('click', function() {
+        document.querySelectorAll('.speaker-notes-box').forEach(box => {
+            box.classList.toggle('d-none');
+        });
+    });
+
+    // Fullscreen Toggle
+    document.getElementById('fullscreenBtn').addEventListener('click', function() {
+        const elem = document.getElementById('presentationContainer');
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => alert(`Error entering fullscreen: ${err.message}`));
+        } else {
+            document.exitFullscreen();
+        }
+    });
+
+    // Initialize first slide
+    showSlide(0);
+</script>
+{% endblock %}
